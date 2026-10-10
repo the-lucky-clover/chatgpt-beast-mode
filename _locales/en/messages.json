@@ -215,7 +215,8 @@
     "message": "Available only with the OpenAI API provider"
   },
   "askQuestion": {
-    "message": "Ask question (Beta)"
+    "message": "Ask question",
+    "description": "Tab label"
   },
   "askQuestionIntro": {
     "message": "Hello! 🤖 I'm here to help answer any questions you have about this page's content. How can I assist you today?"

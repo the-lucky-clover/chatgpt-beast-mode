@@ -120,6 +120,48 @@ async function initFontSize() {
   });
 }
 
+// Batch tab switching
+const batchTabBtn = document.getElementById("batch-tab-btn");
+const batchPanel = document.getElementById("batch-panel");
+const mainApp = document.getElementById("app");
+
+function switchToBatchTab() {
+  const isBatch = batchPanel?.hidden === false;
+  const newBatch = !isBatch;
+
+  batchTabBtn?.setAttribute("aria-selected", String(newBatch));
+  batchPanel?.hidden = !newBatch;
+  batchPanel?.setAttribute("aria-hidden", String(!newBatch));
+  mainApp?.style.setProperty("display", newBatch ? "none" : "flex");
+
+  // Notify background
+  chrome.runtime.sendMessage({ type: "BM_TAB_SWITCH", tab: newBatch ? "batch" : "summarize" });
+  
+  // If switching to batch, load results
+  if (newBatch && window.bmBatchInit) {
+    window.bmBatchInit();
+  }
+}
+
+batchTabBtn?.addEventListener("click", switchToBatchTab);
+
+const batchCloseBtn = document.getElementById("batch-close-btn");
+batchCloseBtn?.addEventListener("click", () => {
+  batchTabBtn.setAttribute("aria-selected", "false");
+  batchPanel?.hidden = true;
+  batchPanel?.setAttribute("aria-hidden", "true");
+  mainApp?.style.setProperty("display", "flex");
+  chrome.runtime.sendMessage({ type: "BM_TAB_SWITCH", tab: "summarize" });
+});
+
+// Keyboard shortcut Ctrl+B
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+    e.preventDefault();
+    switchToBatchTab();
+  }
+});
+
 Promise.all([initTheme(), initFontSize(), applyStoredActiveTheme()]).catch(error => showError(error.message));
 storage.onChange((changes) => {
   if (STORAGE_KEYS.fontScale in changes) applyFontScale(changes[STORAGE_KEYS.fontScale].newValue ?? 100);
