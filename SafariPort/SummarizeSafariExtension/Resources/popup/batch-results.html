@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch Summarization Results</title>
+  <link rel="stylesheet" href="batch-results.css">
+</head>
+<body>
+  <div class="bm-app">
+    <!-- Glassmorphic Header -->
+    <header class="bm-header glass">
+      <div class="header-left">
+        <div class="logo-wrapper">
+          <img src="logo-48.png" alt="Beast Mode" class="logo">
+        </div>
+        <div class="title-block">
+          <h1 class="title shimmer">Batch Summaries</h1>
+          <p class="subtitle">Glassmorphic results dashboard</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="sort-control glass-chip">
+          <label for="sort-select" class="sr-only">Sort results</label>
+          <select id="sort-select" aria-label="Sort results">
+            <option value="chrono">📅 Chronological</option>
+            <option value="az">🔤 A–Z</option>
+            <option value="usage">📊 Usage</option>
+          </select>
+        </div>
+        <button id="export-btn" class="btn glass-btn primary" aria-label="Export as CSV">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Export CSV</span>
+        </button>
+        <button id="close-btn" class="btn glass-btn ghost" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar glass">
+      <div class="stat">
+        <span class="stat-value" id="total-count">0</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value success" id="success-count">0</span>
+        <span class="stat-label">Success</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value error" id="error-count">0</span>
+        <span class="stat-label">Failed</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="window-count">0</span>
+        <span class="stat-label">Windows</span>
+      </div>
+    </div>
+
+    <!-- Results Grid (Bento Box) -->
+    <main class="results-grid" id="results-grid" role="list" aria-label="Summarization results">
+      <!-- Cards injected here -->
+    </main>
+
+    <!-- Empty State -->
+    <div class="empty-state glass" id="empty-state" hidden>
+      <svg class="empty-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="60" height="60" rx="8" stroke="currentColor" stroke-width="2"/>
+        <path d="M16 22h32M16 32h24M16 42h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h2>No Results Yet</h2>
+      <p>Right-click the extension icon → choose a batch option</p>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container" aria-live="polite"></div>
+  </div>
+
+  <script type="module" src="batch-results.js"></script>
+</body>
+</html>

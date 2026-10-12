@@ -6,6 +6,7 @@
     <title>ChatGPT Beast Mode</title>
     <link rel="stylesheet" href="../options/index.css" />
     <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="batch-results.css" />
   </head>
   <body>
     <div class="popup-container">
@@ -17,6 +18,9 @@
           </div>
 
           <div class="header-actions">
+            <button id="batch-tab-btn" class="icon-btn" type="button" role="tab" aria-selected="false" aria-label="Batch Summaries" title="Batch Summaries">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
             <div class="text-size-control">
               <button id="text-size-btn" class="icon-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Adjust text size" title="Text size">
                 <span class="aa-icon" aria-hidden="true">Aa</span>
@@ -53,8 +57,58 @@
       <main class="popup-main">
         <div id="app"></div>
       </main>
+
+      <!-- Batch Summaries Tab Panel (hidden by default) -->
+      <section id="batch-panel" class="panel hidden" aria-hidden="true">
+        <header class="panel-header glass">
+          <h2 class="panel-title">📊 Batch Summaries</h2>
+          <div class="panel-actions">
+            <select id="batch-sort-select" class="glass-chip" aria-label="Sort batch results">
+              <option value="chrono">📅 Chronological</option>
+              <option value="az">🔤 A–Z</option>
+              <option value="usage">📊 Usage</option>
+            </select>
+            <button id="batch-export-btn" class="btn glass-btn primary" aria-label="Export as CSV">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span>Export</span>
+            </button>
+            <button id="batch-close-btn" class="btn glass-btn ghost" aria-label="Close batch panel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </header>
+        <div class="panel-stats glass" id="batch-stats" aria-live="polite">
+          <div class="stat"><span class="stat-value" id="batch-total">0</span><span class="stat-label">Total</span></div>
+          <div class="stat"><span class="stat-value success" id="batch-success">0</span><span class="stat-label">Success</span></div>
+          <div class="stat"><span class="stat-value error" id="batch-errors">0</span><span class="stat-label">Failed</span></div>
+          <div class="stat"><span class="stat-value" id="batch-windows">0</span><span class="stat-label">Windows</span></div>
+        </div>
+        <div class="batch-table-container">
+          <table class="batch-table glass" id="batch-table" role="grid" aria-label="Batch summarization results">
+            <thead>
+              <tr>
+                <th scope="col" data-sort="chrono">⏱ Time <button class="sort-btn" data-sort="chrono" aria-label="Sort by time">⇅</button></th>
+                <th scope="col">🖼 Preview</th>
+                <th scope="col" data-sort="url">🔗 URL <button class="sort-btn" data-sort="url" aria-label="Sort by URL">⇅</button></th>
+                <th scope="col" data-sort="az">📄 Title / Summary <button class="sort-btn" data-sort="az" aria-label="Sort by title">⇅</button></th>
+                <th scope="col">📊 Progress</th>
+                <th scope="col">⚡ Actions</th>
+              </tr>
+            </thead>
+            <tbody id="batch-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state glass" id="batch-empty" hidden>
+          <svg class="empty-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="8" stroke="currentColor" stroke-width="2"/><path d="M16 22h32M16 32h24M16 42h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <h3>No Batch Results</h3>
+          <p>Right-click extension icon → choose a batch option</p>
+        </div>
+      </section>
     </div>
     <script src="header.js" type="module"></script>
     <script src="index.js" type="module"></script>
+    <script src="batch-results.js" type="module"></script>
   </body>
 </html>

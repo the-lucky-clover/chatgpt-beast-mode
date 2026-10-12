@@ -10,9 +10,21 @@
     "48": "icons/logo-48.png",
     "128": "icons/logo-128.png"
   },
-  "host_permissions": ["http://*/*", "https://*/*"],
-  "permissions": ["storage", "tabs", "scripting", "contextMenus", "unlimitedStorage", "alarms"],
-  "optional_host_permissions": ["file://*/*"],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting",
+    "contextMenus",
+    "unlimitedStorage",
+    "alarms"
+  ],
+  "optional_host_permissions": [
+    "file://*/*"
+  ],
   "background": {
     "service_worker": "background/index.js",
     "type": "module"
@@ -21,14 +33,33 @@
     "default_popup": "popup/index.html",
     "default_title": "__MSG_appActionTitle__"
   },
-  "content_scripts": [{
-    "matches": ["http://*/*", "https://*/*"],
-    "js": ["content-script/index.js"],
-    "run_at": "document_start",
-    "css": ["popup/styles.css"]
-  }],
-  "web_accessible_resources": [{
-    "resources": ["popup/index.html", "popup/pdf.worker.js", "popup/wasm/sha3_wasm_bg.wasm"],
-    "matches": ["http://*/*", "https://*/*", "file:///*"]
-  }]
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content-script/index.js"
+      ],
+      "run_at": "document_start",
+      "css": [
+        "styles.css"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "popup/index.html",
+        "pdf.worker.js",
+        "wasm/sha3_wasm_bg.wasm"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "file:///*"
+      ]
+    }
+  ]
 }
