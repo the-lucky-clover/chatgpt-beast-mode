@@ -2,6 +2,8 @@
 // Deliberately isolated from index.js so it never depends on / interferes with
 // the bundled app that mounts into #app.
 import { STORAGE_KEYS, storage, applyStoredActiveTheme, applyColorMode, watchColorMode, bindAction } from "../shared/theme.js";
+import {trackUsage} from "../shared/analytics-client.js";
+trackUsage("popup_opened");
 
 
 function showError(message) {
@@ -22,18 +24,11 @@ on(document.getElementById("close-btn"), "click", () => {
   else window.close();
 });
 
-document.querySelector(".popup-header")?.addEventListener("mousedown", event => {
-  if (event.button !== 0 || event.target.closest("button, input, .popover") || window.parent === window) return;
+// Screen coordinates stay stable while the parent moves this iframe.
+document.querySelector(".popup-header")?.addEventListener("pointerdown", event => {
+  if (event.button !== 0 || event.target.closest("button, input, a, .popover") || window.parent === window) return;
   event.preventDefault();
-  const move = event => window.parent.postMessage({type: "DRAG_MOUSEMOVE", movementX: event.movementX, movementY: event.movementY, runtimeId: chrome.runtime.id}, "*");
-  const stop = () => {
-    document.removeEventListener("mousemove", move);
-    document.removeEventListener("mouseup", stop);
-    window.removeEventListener("blur", stop);
-  };
-  document.addEventListener("mousemove", move);
-  document.addEventListener("mouseup", stop);
-  window.addEventListener("blur", stop);
+  window.parent.postMessage({type: "POPUP_DRAG_START", screenX: event.screenX, screenY: event.screenY, runtimeId: chrome.runtime.id}, "*");
 });
 
 // Remove info/refresh buttons from summary header, keep only copy
@@ -48,8 +43,9 @@ const summaryActionsObserver = new MutationObserver(() => {
 });
 summaryActionsObserver.observe(document.body, {subtree: !0, childList: !0});
 
+const defaultFontScale = chrome.runtime.getManifest().background?.service_worker ? 120 : 100;
 function applyFontScale(percent) {
-  percent = Number.isFinite(Number(percent)) ? Math.min(130, Math.max(85, Number(percent))) : 100;
+  percent = Number.isFinite(Number(percent)) ? Math.min(240, Math.max(85, Number(percent))) : defaultFontScale;
   document.documentElement.style.setProperty("--font-scale", String(percent / 100));
   const label = document.getElementById("text-size-value");
   if (label) label.textContent = String(percent);
@@ -80,7 +76,7 @@ async function initTheme() {
 }
 
 async function initFontSize() {
-  const stored = await storage.get(STORAGE_KEYS.fontScale, 100);
+  const stored = await storage.get(STORAGE_KEYS.fontScale, defaultFontScale);
   applyFontScale(stored);
 
   const btn = document.getElementById("text-size-btn");
@@ -115,56 +111,22 @@ async function initFontSize() {
 
   on(slider, "input", async (event) => {
     const percent = Number(event.target.value);
-    await storage.set(STORAGE_KEYS.fontScale, percent);
     applyFontScale(percent);
+    await storage.set(STORAGE_KEYS.fontScale, percent);
   });
 }
 
-// Batch tab switching
-const batchTabBtn = document.getElementById("batch-tab-btn");
-const batchPanel = document.getElementById("batch-panel");
-const mainApp = document.getElementById("app");
-
-function switchToBatchTab() {
-  const isBatch = batchPanel?.hidden === false;
-  const newBatch = !isBatch;
-
-  batchTabBtn?.setAttribute("aria-selected", String(newBatch));
-  batchPanel?.hidden = !newBatch;
-  batchPanel?.setAttribute("aria-hidden", String(!newBatch));
-  mainApp?.style.setProperty("display", newBatch ? "none" : "flex");
-
-  // Notify background
-  chrome.runtime.sendMessage({ type: "BM_TAB_SWITCH", tab: newBatch ? "batch" : "summarize" });
-  
-  // If switching to batch, load results
-  if (newBatch && window.bmBatchInit) {
-    window.bmBatchInit();
-  }
-}
-
-batchTabBtn?.addEventListener("click", switchToBatchTab);
-
-const batchCloseBtn = document.getElementById("batch-close-btn");
-batchCloseBtn?.addEventListener("click", () => {
-  batchTabBtn.setAttribute("aria-selected", "false");
-  batchPanel?.hidden = true;
-  batchPanel?.setAttribute("aria-hidden", "true");
-  mainApp?.style.setProperty("display", "flex");
-  chrome.runtime.sendMessage({ type: "BM_TAB_SWITCH", tab: "summarize" });
-});
-
-// Keyboard shortcut Ctrl+B
-document.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
-    e.preventDefault();
-    switchToBatchTab();
+// Keep batch results in their own full-size tab.
+document.addEventListener("keydown", event => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "b") {
+    event.preventDefault();
+    chrome.runtime.sendMessage({type:"OPEN_BATCH_RESULTS",to:"background"}).catch(error => showError(error.message));
   }
 });
 
 Promise.all([initTheme(), initFontSize(), applyStoredActiveTheme()]).catch(error => showError(error.message));
 storage.onChange((changes) => {
-  if (STORAGE_KEYS.fontScale in changes) applyFontScale(changes[STORAGE_KEYS.fontScale].newValue ?? 100);
+  if (STORAGE_KEYS.fontScale in changes) applyFontScale(changes[STORAGE_KEYS.fontScale].newValue ?? defaultFontScale);
   if (STORAGE_KEYS.activeThemeVars in changes || STORAGE_KEYS.activeThemeId in changes) {
     applyStoredActiveTheme().catch(error => showError(error.message));
   }

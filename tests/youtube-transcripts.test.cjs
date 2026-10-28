@@ -10,7 +10,7 @@ const captions = JSON.stringify({events: [{segs: [{utf8: 'Actual transcript'}]}]
 function setup({scripts = [], button = null, response = '', html = '', ok = true, fetchImpl} = {}) {
   const listeners = new Set(), timers = new Set(), requests = [];
   const ctx = vm.createContext({URL, AbortController, DOMParser: class {parseFromString() {return {querySelector: () => true};}},
-    Z: href => new URL(href).searchParams.get('v'), window: {location: {href: `https://www.youtube.com/watch?v=${videoId}`}},
+    Z: href => new URL(href).searchParams.get('v'), window: {location: {href: `https://www.youtube.com/watch?v=${videoId}`}, addEventListener() {}},
     console: {warn: () => assert.fail('Caption fallback must not emit extension warnings'), error: () => assert.fail('Caption fallback must not emit extension errors')},
     document: {querySelector: () => button, querySelectorAll: () => scripts.map(textContent => ({textContent}))},
     ae: {default: {runtime: {onMessage: {addListener: fn => listeners.add(fn), removeListener: fn => listeners.delete(fn)}}}},

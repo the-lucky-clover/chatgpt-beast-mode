@@ -1,4 +1,44 @@
-# Automated Playtests for ChatGPT Beast Mode
+# Automated Playtests for SmryX
+
+## Self-contained regression checks
+
+Run from the repository root:
+
+```powershell
+node --test --test-isolation=none tests/summary-format.test.mjs tests/background-answer.test.cjs tests/model-selection.test.cjs tests/chatgpt-session.test.cjs tests/branding.test.cjs tests/connection-diagnostics.test.mjs
+node tests/extension-summary.cjs
+node --test --test-isolation=none tests/batch-menu.test.cjs tests/batch-session.test.mjs tests/batch-preferences.test.mjs
+node tests/batch-workspace.cjs
+```
+
+The first command checks Markdown formatting, prompt migration, ChatGPT-only routing,
+streaming, cancellation, and removal of stale model selections without network access. The browser check uses
+Playwright Chromium to load the unpacked extension and verify formatting,
+entrance animations, summaries, and Ask question with controlled ChatGPT web
+responses. It also checks that Settings and onboarding have no provider, model,
+or API key controls and that legacy provider settings cannot change inference.
+It also reproduces transient and persistent ChatGPT errors, checks stable device identity and cookies, and verifies the official status link. A source scan checks all project files for retired branding, including ignored bundles. It uses no real API credentials. The browser screenshot
+is written to the system temporary directory.
+
+The batch workspace check opens the dedicated results tab through the background
+router and tests its two-column table, progress-to-image transition, actual
+background screenshots, search, filters, reader, JSON/CSV downloads, session
+merge and resume, pause, and confirmed clearing. It runs a temporary copy of the
+extension with screenshot access pre-granted; the installed extension requests
+the optional debugger permission only when background screenshots are selected.
+ChatGPT responses are controlled. Source extraction, screenshots, storage,
+downloads, and tab behavior use real browser APIs. Screenshots of desktop,
+mobile, light, and dark layouts are saved in the system temporary directory.
+
+The browser check also verifies single-tab additions to a running queue,
+left-to-right batch order, and the global default-off close preference. It
+checks that only saved successes close; failed or navigated source tabs and
+the results tab remain open. Native tab-strip menus are registered where the
+browser supports them; older Chromium builds use the page menu and the pinned
+extension's "Add this tab to Batch" action.
+
+After editing `background/batch-module.js`, run
+`node scripts/sync-batch-worker.cjs` to embed it in both shipped workers.
 
 ## Setup
 
@@ -43,8 +83,8 @@ npm run test:providers
 | Test Suite | Coverage |
 |------------|----------|
 | **Ask Question Tab** | Opens, streams answer, handles errors, keyboard shortcuts |
-| **Batch Summarization** | Context menu, results table, progress bars, sorting, CSV export |
-| **Provider Compatibility** | ChatGPT Web, OpenAI API, DeepSeek Chat, DeepSeek API |
+| **Batch Summarization** | Toolbar context menu, dedicated results tab, screenshots, session recovery, exports |
+| **ChatGPT session** | Web-only inference, legacy settings migration, ChatGPT default routing |
 
 ## Key Test Scenarios
 
@@ -56,18 +96,23 @@ npm run test:providers
 - No "OpenAI provider only" error
 
 ### Batch Summarization
-- Context menu shows 5 batch options
-- Results tab shows glassmorphic table with thumbnails
-- Animated progress bars with shimmer effect
-- Sortable by Chronological / A-Z / Usage
-- Export to CSV works
-- Retry failed items
+- Right-clicking the extension action offers Batch Summaries
+- Opens or focuses one dedicated results tab
+- Two-column table shows preview images and two TL;DR paragraphs per page
+- Animated loading bars become completed site images
+- Optional background screenshots leave source tabs inactive
+- Search, status filters, sorting, and a full reading panel
+- JSON sessions retain images, completed summaries, and unfinished rows
+- Imports merge results and resume unfinished pages without repeating completed work
+- Complete CSV exports and confirmed Clear all
+- Pause aborts active work and preserves the remaining queue
 
-### Provider Compatibility
-- ChatGPT Web (default, no API key)
-- OpenAI API (with key)
-- DeepSeek Chat (web)
-- DeepSeek API (with key)
+### ChatGPT session
+- Uses the signed-in ChatGPT web session for all inference
+- Ignores old API and DeepSeek provider settings
+- Sends `auto` for ChatGPT to route each request; never selects a named model from a catalog
+- Clears cached model IDs, including the reported `gpt-5-3-mini` failure
+- Removes provider, model, and API key controls from Settings and onboarding
 
 ## Running in CI
 

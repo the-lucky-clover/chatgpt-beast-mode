@@ -1,0 +1,25 @@
+{
+  "name": "smryx",
+  "version": "1.9.9",
+  "private": true,
+  "description": "Webpage summaries, questions and batch sessions powered by your signed-in ChatGPT session.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "test": "node scripts/run-unit-tests.cjs",
+    "test:popup": "node tests/extension-summary.cjs",
+    "test:batch": "node tests/batch-workspace.cjs",
+    "test:safari-mobile": "node tests/apple-safari-mobile.cjs",
+    "build:safari": "node scripts/build-apple-safari.cjs",
+    "test:presentation": "node tests/presentation.cjs",
+    "test:popup-layout": "node tests/retro-popup.cjs",
+    "audit:brand": "node scripts/audit-retired-brand.cjs",
+    "test:legal": "node tests/legal-pages.cjs",
+    "test:website-analytics": "node tests/website-analytics.cjs",
+    "test:popup-window": "node tests/popup-window.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.57.0"
+  }
+}
